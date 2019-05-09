@@ -7,6 +7,8 @@ import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.File;
@@ -14,6 +16,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class DBHelper extends SQLiteOpenHelper{
 
@@ -113,18 +118,62 @@ public class DBHelper extends SQLiteOpenHelper{
         Cursor cursor = db.query(DBHelper.TABLE_TESTS, null, null, null, null, null, null);
         if (cursor.moveToFirst()){
             int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);
-            int nameIndex = cursor.getColumnIndex(DBHelper.KEY_TOPIC);
-            int surnameIndex = cursor.getColumnIndex(DBHelper.KEY_QID);
-            int phoneIndex = cursor.getColumnIndex(DBHelper.KEY_PHOTO);
+            int topic = cursor.getColumnIndex(DBHelper.KEY_TOPIC);
+            int questionID = cursor.getColumnIndex(DBHelper.KEY_QID);
+            int photoID = cursor.getColumnIndex(DBHelper.KEY_PHOTO);
             do{
                 Log.d("mLog", "ID = " + cursor.getInt(idIndex) +
-                        ", name = " + cursor.getString(nameIndex)+
-                        ", surname = " + cursor.getString(surnameIndex)+
-                        ", phone = " + cursor.getString(phoneIndex));
+                        ", topic = " + cursor.getString(topic)+
+                        ", questionID = " + cursor.getString(questionID)+
+                        ", photoID = " + cursor.getString(photoID));
             }while (cursor.moveToNext());
         }else
             Log.d("mLog","0 rows");
         cursor.close();
-
     }
+    String[] getPhotoIDbyTopic(SQLiteDatabase db, String topic){
+        ArrayList<String> arr = new ArrayList<>();
+        db = getWritableDatabase();
+        Cursor c = db.query(DBHelper.TABLE_TESTS, null, null, null, null, null, null);
+        if (c.moveToFirst()) {
+            do {
+                if(c.getString(c.getColumnIndex(DBHelper.KEY_TOPIC)).equals(topic)){
+                    int nameIndex = c.getColumnIndex(DBHelper.KEY_PHOTO);
+                    arr.add(c.getString(nameIndex));
+                }
+            } while (c.moveToNext());
+
+        } else
+            Log.d("mLog", "0 rows");
+        c.close();
+        db.close();
+        return arr.toArray(new String[arr.size()]);
+    }
+    String[] getTopics(SQLiteDatabase db){
+        ArrayList<String> arr = new ArrayList<String>();
+        db = getWritableDatabase();
+        Cursor c = db.query(DBHelper.TABLE_TESTS, null, null, null, null, null, null);
+        if (c.moveToFirst()) {
+            do {
+                int topicIndex = c.getColumnIndex(DBHelper.KEY_TOPIC);
+                arr.add(c.getString(topicIndex));
+            } while (c.moveToNext());
+
+        } else
+            Log.d("mLog", "0 rows");
+
+        c.close();
+        db.close();
+        return new HashSet<String>(arr).toArray(new String[0]);
+    }
+
+    int getSize() {
+        String countQuery = "SELECT  * FROM " + TABLE_TESTS;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
+
 }
