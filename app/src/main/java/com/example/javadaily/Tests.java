@@ -33,6 +33,8 @@ public class Tests extends Fragment{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View rootView = inflater.inflate(R.layout.fragment_tests, container, false);
+
+        //Setting database helper
         mDBHelper = new DBHelper(getContext());
         try {
             mDBHelper.updateDataBase();
@@ -40,22 +42,27 @@ public class Tests extends Fragment{
             throw new Error("UnableToUpdateDatabase");
         }
         mDb = mDBHelper.getWritableDatabase();
-        ImageView romko = (ImageView) rootView.findViewById(R.id.Romko);
-        Log.v("Hi,Gryga",Arrays.toString(mDBHelper.getPhotoIDbyTopic(mDb,"static")));
         final String testsViewArray[] = mDBHelper.getTopics(mDb);
 
-        //mDBHelper.getPhotoIDbyTopic(mDb,"static");
-
+        //Adapter
         final ArrayAdapter<String> testAdapter=new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1,testsViewArray);
         ListView t_list =(ListView) rootView.findViewById(R.id.testslist);
         t_list.setAdapter(testAdapter);
+
+
+        //Clicking on test
         t_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                String[] string = mDBHelper.getPhotoIDbyTopic(mDb,testsViewArray[(int)id]);
-                Intent i = new Intent(getActivity(), ExampleTest.class);
-                i.putExtra("STRING", string);
+
+                String[] photos = mDBHelper.getPhotoIDbyTopic(mDb,testsViewArray[(int)id]); //getting photos
+                String[] answers = mDBHelper.getAnswersbyTopic(mDb,testsViewArray[(int)id]);//getting right answers
+                Intent i = new Intent(getActivity(), ExampleTest.class);                    //making Intent
+//                Log.v("123",(Arrays.toString(photos)));                                //print
+//                Log.v("123",(Arrays.toString(answers)));                               //print
+                i.putExtra("PHOTOS", photos);                                        //pushing photos
+                i.putExtra("ANSWERS", answers);                                       //pushing answers
                 startActivityForResult(i, ID_ExampleTest);
             }
         });

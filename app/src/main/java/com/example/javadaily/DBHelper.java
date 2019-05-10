@@ -31,6 +31,7 @@ public class DBHelper extends SQLiteOpenHelper{
     public static final String KEY_TOPIC = "topic";
     public static final String KEY_QID = "questionID";
     public static final String KEY_PHOTO = "photoID";
+    public static final String KEY_ANSWER = "answer";
 
     private SQLiteDatabase mDataBase;
     private final Context mContext;
@@ -121,6 +122,7 @@ public class DBHelper extends SQLiteOpenHelper{
             int topic = cursor.getColumnIndex(DBHelper.KEY_TOPIC);
             int questionID = cursor.getColumnIndex(DBHelper.KEY_QID);
             int photoID = cursor.getColumnIndex(DBHelper.KEY_PHOTO);
+            int answer = cursor.getColumnIndex(DBHelper.KEY_ANSWER);
             do{
                 Log.d("mLog", "ID = " + cursor.getInt(idIndex) +
                         ", topic = " + cursor.getString(topic)+
@@ -166,7 +168,24 @@ public class DBHelper extends SQLiteOpenHelper{
         db.close();
         return new HashSet<String>(arr).toArray(new String[0]);
     }
+    String[] getAnswersbyTopic(SQLiteDatabase db, String topic){
+        ArrayList<String> arr = new ArrayList<>();
+        db = getWritableDatabase();
+        Cursor c = db.query(DBHelper.TABLE_TESTS, null, null, null, null, null, null);
+        if (c.moveToFirst()) {
+            do {
+                if(c.getString(c.getColumnIndex(DBHelper.KEY_TOPIC)).equals(topic)){
+                    int nameIndex = c.getColumnIndex(DBHelper.KEY_ANSWER);
+                    arr.add(c.getString(nameIndex));
+                }
+            } while (c.moveToNext());
 
+        } else
+            Log.d("mLog", "0 rows");
+        c.close();
+        db.close();
+        return arr.toArray(new String[arr.size()]);
+    }
     int getSize() {
         String countQuery = "SELECT  * FROM " + TABLE_TESTS;
         SQLiteDatabase db = this.getReadableDatabase();
