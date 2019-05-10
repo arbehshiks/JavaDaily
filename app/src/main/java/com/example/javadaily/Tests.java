@@ -1,6 +1,7 @@
 package com.example.javadaily;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,14 +27,12 @@ public class Tests extends Fragment{
     private SQLiteDatabase mDb;
     ListView t_list;
     ImageView Romko;
-
+    int ID_ExampleTest = 1;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View rootView = inflater.inflate(R.layout.fragment_tests, container, false);
-
-
         mDBHelper = new DBHelper(getContext());
         try {
             mDBHelper.updateDataBase();
@@ -41,37 +40,26 @@ public class Tests extends Fragment{
             throw new Error("UnableToUpdateDatabase");
         }
         mDb = mDBHelper.getWritableDatabase();
-
         ImageView romko = (ImageView) rootView.findViewById(R.id.Romko);
-
-
-
         Log.v("Hi,Gryga",Arrays.toString(mDBHelper.getPhotoIDbyTopic(mDb,"static")));
-
-        String testsViewArray[] = mDBHelper.getTopics(mDb);
-
-
+        final String testsViewArray[] = mDBHelper.getTopics(mDb);
 
         //mDBHelper.getPhotoIDbyTopic(mDb,"static");
 
-
-
-
-        ArrayAdapter<String> testAdapter=new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1,testsViewArray);
+        final ArrayAdapter<String> testAdapter=new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1,testsViewArray);
         ListView t_list =(ListView) rootView.findViewById(R.id.testslist);
         t_list.setAdapter(testAdapter);
-
-
-
-
-
-
-        //weatherIcon.setImageResource(getImageId(getContext(),output));
+        t_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                String[] string = mDBHelper.getPhotoIDbyTopic(mDb,testsViewArray[(int)id]);
+                Intent i = new Intent(getActivity(), ExampleTest.class);
+                i.putExtra("STRING", string);
+                startActivityForResult(i, ID_ExampleTest);
+            }
+        });
 
         return rootView;
-    }
-
-    public static int getImageId(Context context, String imageName) {
-        return context.getResources().getIdentifier("drawable/" + imageName, null, context.getPackageName());
     }
 }
